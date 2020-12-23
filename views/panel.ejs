@@ -1,0 +1,159 @@
+<% include  head.ejs%>
+
+
+<style>
+
+
+.item_chat {
+   border: 1px solid #000;
+   height: 50px;
+   margin: 0 !important;
+}
+
+</style>
+
+   <div class="row container">
+
+
+        <div class="col-sm-4 col-md-4col-lg-4">
+         <ul id="mUser" class="list-group">
+            <li class="list-group-item">Usuarios en linea</li>
+          </ul>
+        </div>
+        <!-- fin de la columna -->
+
+        <div class="col-sm-8 col-md-4 col-lg-8">
+       
+             <div id="chat_box"  class="list-group" style=" 
+                     border : 1px solid #000;
+                     height: 400px;
+                     width: 600px;
+                     padding: 12px;
+                     margin: 11px;
+             ">
+             </div>
+             <!-- fin del chat box -->
+
+             <div id="noti" class="row"  style="
+             border : 1px solid #000;
+             margin: 7px;
+             padding: 7px;
+             width: 500px;
+           ">
+               Hook To ->  <p id="socketHook"></p>
+             </div>
+
+
+
+
+             <!-- fin de l card -->
+             <div class="controles row" style="
+               border : 1px solid #000;
+               margin: 11px;
+               padding: 12px;
+               width: 500px;
+             ">
+                    <input  type="text" id="mensaje" placeholder="text" style="
+                       width: 400px !important;
+                    ">
+                    <!-- <br> -->
+                    <a href="#" id="send" class="btn btn-primary" style="
+                       width: 100px;
+                       margin : 7px 0;
+                    ">
+                    Enviar</a>
+             </div>
+        </div>
+        <!-- fin de la columna -->
+
+   </div>
+
+     <!-- cargamos los sockets del cliente -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js.map"></script>
+    
+  <script>
+
+      var socket = io();
+      var uSockets = []; //los nombres de los socket en la lista
+
+         // parseamos
+    let mUsers = document.getElementById('mUser');
+    let enviar = document.getElementById('enviar');
+             
+     // en caso de conexion
+     socket.on('connect', () => {
+       console.log('socket conectado  ');
+    });
+
+     //request para tener privilegios admin
+     socket.emit('user-admin','asd');
+
+    // mensaje de exito
+    socket.on('exito-admin', function(data){
+     console.log('admin logeado correcto')
+    });
+
+      // cuando un nuevo usuario se conecte
+      socket.on('user-online', function(nombre){
+            // creamo objeti
+            var obj = {
+                user    : nombre,
+                mensajes : [] // array con mensjae
+            };
+             uSockets[nombre] = obj;  // new objet reference
+             let li = document.createElement('li'); 
+            li.classList.add('list-group-item');
+            li.textContent = nombre; 
+            mUsers.appendChild(li); // append
+      });
+
+
+         // them hooks
+       let chat_box   = document.querySelector('#chat_box');
+       let hook       = document.getElementById('socketHook');
+      
+
+     // cuando recibamos un mensaje
+      socket.on('mensaje', function(data){
+         switch( data.user ){
+            case hook.textContent :    // si el usuairo es que que tenemos seleccionadop
+                  let buffer = data.user + ' : ' + data.mensaje; // buffer
+                  let alerta = document.createElement('p'); // creamos
+                  alerta.textContent = buffer; //modd
+                  chat_box.append(alerta); // append
+                  uSockets[data.user].mensajes.push(data.mensaje);  // guardamos
+               break;
+               default:
+                  // solamente guardamos
+                  uSockets[data.user].mensajes.push(data.mensaje);    
+         }
+     });
+
+       
+      // alñ documento
+       document.addEventListener('click',function(e){
+        //  console.log(e.target.classList);
+                if(e.target.classList.contains('list-group-item')){  // si cocincide con el elemento creado tiene esta clase
+                       
+                         // get these things
+                        let target = e.target.textContent;
+                        let data = uSockets[target].mensajes;
+                      
+                      // update
+                        hook.textContent = target; 
+                        chat_box.innerHTML = '';  
+
+                        // build the chat
+                       data.forEach( (ele,index) => {
+                              let p = document.createElement('p');
+                              p.textContent = uSockets[target].user  + ' :: ' + ele.toString(); // actualizmos el contrenidodel ele,mento
+                              chat_box.append(p); // agregamos al chat box a partir
+                       });
+                }
+       });
+
+
+   </script>
+
+<% include foot.ejs%>

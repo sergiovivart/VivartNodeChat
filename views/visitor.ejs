@@ -1,0 +1,63 @@
+<% include  head.ejs%>
+
+
+<div class="container">
+ <div class="row ">
+      
+   
+   <div class="wrap" style=" 
+          position: relative;
+         width: 221px;
+         height: 200px;
+         margin: 50px 10px;
+         border: 1px solid #000;
+         border-radius: 100%;
+         padding: 57px 25px;
+   ">
+      <input type="text" name="mensaje" id="mensaje">
+      <button id="enviar" class="btn btn-primary" type="button" style="
+          margin : 10px auto;
+          position: relative;
+          ">
+          enviar a admin
+      </button>
+   </div>
+    
+ </div>
+</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js.map"></script>
+    
+
+   <script>
+   
+  var socket = io(); //inciamos el socket
+  var nombre = 'yomismo';
+
+ // en caso de conexion
+  socket.on('connect', () => {
+       console.log('socket conectado  ');
+       socket.emit('user-online' , nombre);
+    });
+
+    // hooks
+    let enviar = document.getElementById('enviar');
+    let mensaje =  document.getElementById('mensaje');
+
+    // enviar nombre
+    enviar.addEventListener('click', (e)=>{
+      // creamosun objeto con el sujeto que envia y el mensaje
+      let data =  {
+         user    : nombre,
+         mensaje : mensaje.value
+      };
+
+      socket.emit('mensaje' , data); //e vniamso el nombre
+      mensaje.value = ''; // reset
+   
+   });
+
+   </script>
+
+<% include foot.ejs%>
